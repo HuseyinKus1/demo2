@@ -1,0 +1,53 @@
+sequenceDiagram
+    participant User
+    participant Client
+    participant API Gateway
+    participant Auth Service
+    participant Service A
+    participant Service B
+    participant Message Queue
+    participant Database
+
+    User->>Client: Login Request
+    Client->>API Gateway: POST /login
+    API Gateway->>Auth Service: Authenticate User
+    Auth Service->>Database: Validate Credentials
+    Database-->>Auth Service: User Data
+    Auth Service->>Auth Service: Generate JWT with expiry
+    Auth Service-->>API Gateway: Return JWT
+    API Gateway-->>Client: Return JWT
+    Client->>Client: Store JWT
+
+    User->>Client: Request Protected Resource
+    Client->>API Gateway: GET /resource (with JWT in header)
+    API Gateway->>API Gateway: Validate JWT Signature and Expiry
+
+    alt JWT is Valid
+        API Gateway->>Service A: Forward Request (with JWT in header)
+        Service A->>Service A: Validate JWT
+        Service A->>Service A: Authorize Request based on JWT claims
+
+        alt Resource Requires Data from Service B
+            Service A->>Message Queue: Publish Request (Encrypted, with necessary claims from JWT)
+            Message Queue->>Service B: Deliver Message
+            Service B->>Service B: Decrypt and Validate Message
+            Service B->>Service B: Authorize Request based on JWT claims
+            Service B->>Database: Fetch Required Data
+            Database-->>Service B: Return Data
+            Service B->>Message Queue: Publish Response (Encrypted)
+            Message Queue->>Service A: Deliver Message
+            Service A->>Service A: Decrypt and Process Response
+        end
+
+        Service A->>Service A: Prepare Response
+        Service A-->>API Gateway: Return Resource
+        API Gateway-->>Client: Return Resource
+        Client-->>User: Display Resource
+    else JWT is Invalid or Expired
+        API Gateway-->>Client: 401 Unauthorized
+        Client-->>User: Display Error / Prompt for Login
+    end
+
+    note over API Gateway,Message Queue: All inter-service communication is encrypted
+    note over Service A,Service B: Services implement additional security measures:<br/>- JWT validation<br/>- Authorization based on JWT claims<br/>- Input validation<br/>- Rate limiting
+    note over Message Queue: Message Queue implements:<br/>- Authentication<br/>- Access Control<br/>- Message Encryption

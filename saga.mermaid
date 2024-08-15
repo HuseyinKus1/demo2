@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant LS as Listing Service
+    participant SO as Saga Orchestrator
+    participant PS as Property Service
+    participant US as User Service
+
+    Note over LS,US: Successful Scenario
+    LS->>SO: LISTING_CREATED event
+    SO->>PS: Property Update Command
+    PS->>SO: PROPERTY_UPDATE_SUCCESS
+    SO->>US: User Update Command
+    US->>SO: USER_UPDATE_SUCCESS
+    SO->>LS: Saga Completed (success)
+
+    Note over LS,US: Failure Scenario (User Update Fails)
+    LS->>SO: LISTING_CREATED event
+    SO->>PS: Property Update Command
+    PS->>SO: PROPERTY_UPDATE_SUCCESS
+    SO->>US: User Update Command
+    US->>SO: USER_UPDATE_FAILED
+    SO->>PS: Property Rollback Command
+    PS->>SO: PROPERTY_ROLLBACK_SUCCESS
+    SO->>LS: Listing Rollback Command
+    LS->>SO: LISTING_ROLLBACK_SUCCESS
+    SO->>LS: Saga Completed (failure)

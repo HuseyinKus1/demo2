@@ -1,0 +1,81 @@
+server:
+  port: 8090
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1011988302294-9fjldmp724mdnkd94l85v6nfb0h15djs.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-name: Google
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/userservicedb
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  devtools:
+    restart:
+      enabled: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+access:
+  token:
+    expiration: 6000000
+refresh:
+  token:
+    expiration: 259200000
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+rabbitmq:
+  exchange:
+    listing: listing-exchange
+  queue:
+    user-events: user-events-queue
+    saga-events: saga-events-queue
+  routing-key:
+    user-update: listing.user.update
+    saga-event: listing.saga
+
+jwt:
+  key: mYiADZOy9Hq5pTfomhj9hPUJLGAN/ZB6AZ4yoHfCtN0f8DaNQr6+4qeaJ9YfMK4ZbX85J3ao6TotW+jrLKLGeafpaYYLn2mmrYOB/1mJzhQYEaf883PtWAIwnTwHpPuEsJAhyHwEtlTvy++pZA+0bns66RUDBk80bJUA4JhJUI8=

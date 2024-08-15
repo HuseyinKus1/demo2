@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: orchestrator-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orchestratorservicedb
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+server:
+  port: 8097
+rabbitmq:
+  exchange:
+    listing: listing-exchange
+  queue:
+    saga-events: saga-events-queue
+    listing-events: listing-events-queue
+    user-events: user-events-queue
+    listing-status-events: listing-status-events-queue
+    property-rollback-events: property-rollback-events-queue
+  routing-key:
+    property-update: listing.property.update
+    property-rollback: property.rollback
+    user-update: listing.user.update
+    listing-update: listing.update
+    listing-status-update: listing.status.update
+    saga-event: listing.saga

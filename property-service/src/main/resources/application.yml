@@ -1,0 +1,54 @@
+server:
+  port: 8095
+
+spring:
+  application:
+    name: property-service
+  data:
+    mongodb:
+      uri: mongodb://root:password@localhost:27017/demo?authSource=admin
+      database: listings
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+rabbitmq:
+  exchange:
+    listing: listing-exchange
+  queue:
+    property-updates: property-updates-queue
+    property-rollback-events: property-rollback-events-queue
+  routing-key:
+    property-update: listing.property.update
+    saga-event: listing.saga
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          mongodb: DEBUG
+    com:
+      mongodb: TRACE
+
+jwt:
+  key: mYiADZOy9Hq5pTfomhj9hPUJLGAN/ZB6AZ4yoHfCtN0f8DaNQr6+4qeaJ9YfMK4ZbX85J3ao6TotW+jrLKLGeafpaYYLn2mmrYOB/1mJzhQYEaf883PtWAIwnTwHpPuEsJAhyHwEtlTvy++pZA+0bns66RUDBk80bJUA4JhJUI8=

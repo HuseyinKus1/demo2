@@ -1,0 +1,72 @@
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  data:
+    mongodb:
+      uri: mongodb://root:password@localhost:27017/demo?authSource=admin
+      database: logs_db
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+        - id: listing-service
+          uri: lb://LISTING-SERVICE
+          predicates:
+            - Path=/api/v1/listings/** , /api/v1/buildings/**
+        - id: package-service
+          uri: lb://PACKAGE-SERVICE
+          predicates:
+            - Path=/packages/**
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/ap1/v1/payments/**
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/** ,/api/v1/auth/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: localhost
+
+server:
+  port: 8080
+rabbitmq:
+  exchange:
+    listing: listing-exchange
+  queue:
+    logs-queue: logs_queue
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+custom:
+  logging:
+    level: INFO
+
+logging:
+  level:
+    com.netflix.discovery: INFO
+    org.springframework.cloud.netflix.eureka: INFO
+
+jwt:
+  key: mYiADZOy9Hq5pTfomhj9hPUJLGAN/ZB6AZ4yoHfCtN0f8DaNQr6+4qeaJ9YfMK4ZbX85J3ao6TotW+jrLKLGeafpaYYLn2mmrYOB/1mJzhQYEaf883PtWAIwnTwHpPuEsJAhyHwEtlTvy++pZA+0bns66RUDBk80bJUA4JhJUI8=
+
